@@ -7,6 +7,7 @@ import { Wind, MapPin, Clock, Thermometer, Droplets, Eye, AlertCircle, RefreshCw
 import { AQICard } from "./AQICard";
 import { PollutantCard } from "./PollutantCard";
 import { LocationSearch } from "./LocationSearch";
+import { UserProfile } from "./UserProfile";
 import { useAQIData, useCurrentLocation, useLocationUpdate } from "@/hooks/useWeatherData";
 import { AQIData } from "@/types/weather";
 
@@ -106,6 +107,7 @@ export function AQIDashboard() {
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
+            <UserProfile />
           </div>
         </div>
 
