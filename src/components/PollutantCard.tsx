@@ -42,51 +42,53 @@ export function PollutantCard({ name, value, unit, level, trend }: PollutantCard
   const TrendIcon = getTrendIcon(trend);
 
   return (
-    <Card className="shadow-card bg-gradient-card border-0 transition-all hover:shadow-elevated">
-      <CardHeader className="pb-2">
+    <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:scale-105">
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">{name}</span>
+          <span className="text-sm font-semibold text-blue-200">{name}</span>
           {TrendIcon && (
-            <TrendIcon 
-              className={cn(
-                "h-4 w-4",
-                trend === "up" && "text-aqi-poor",
-                trend === "down" && "text-aqi-good",
-                trend === "stable" && "text-muted-foreground"
-              )}
-            />
+            <div className="p-1 rounded-full bg-white/10 border border-white/20">
+              <TrendIcon 
+                className={cn(
+                  "h-3 w-3",
+                  trend === "up" && "text-red-400",
+                  trend === "down" && "text-green-400",
+                  trend === "stable" && "text-blue-300"
+                )}
+              />
+            </div>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-baseline space-x-1">
-          <span className="text-2xl font-bold text-foreground">
+      <CardContent className="space-y-4">
+        <div className="flex items-baseline space-x-2">
+          <span className="text-3xl font-bold text-white">
             {value.toFixed(1)}
           </span>
-          <span className="text-sm text-muted-foreground">{unit}</span>
+          <span className="text-sm text-blue-200/70 font-medium">{unit}</span>
         </div>
         
         <Badge 
           variant="outline"
-          className={cn(
-            "text-xs capitalize",
-            `border-${levelColor} text-${levelColor} bg-${levelColor}/10`
-          )}
+          className="text-xs capitalize bg-white/10 border-white/20 text-white backdrop-blur-sm hover:bg-white/20 transition-all duration-300"
         >
           {level.replace("-", " ")}
         </Badge>
         
-        {/* Visual indicator bar */}
-        <div className="h-1 w-full rounded-full bg-muted">
-          <div 
-            className={cn(
-              "h-full rounded-full transition-all duration-500",
-              `bg-${levelColor}`
-            )}
-            style={{ 
-              width: `${Math.min((value / getMaxValueForPollutant(name)) * 100, 100)}%` 
-            }}
-          />
+        {/* Enhanced visual indicator bar */}
+        <div className="space-y-2">
+          <div className="h-2 w-full rounded-full bg-white/10 border border-white/20 overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 transition-all duration-700 ease-out"
+              style={{ 
+                width: `${Math.min((value / getMaxValueForPollutant(name)) * 100, 100)}%` 
+              }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-blue-200/60">
+            <span>0</span>
+            <span>{getMaxValueForPollutant(name)}</span>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -18,10 +18,12 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
 
   // Search for locations
-  const { data: searchResults, isLoading: isSearching } = useLocationSearch(
+  const { data: searchResults, isLoading: isSearching, error: searchError } = useLocationSearch(
     searchTerm,
     searchTerm.length > 2
   );
+
+
 
   // Get current location
   const currentLocationMutation = useCurrentLocation();
@@ -49,6 +51,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     }
   };
 
+
   return (
     <div className="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
       <Popover open={open} onOpenChange={setOpen}>
@@ -57,40 +60,46 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between md:w-[300px]"
+            className="w-full justify-between md:w-[300px] bg-white/5 backdrop-blur-xl border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all duration-300"
           >
             {selectedLocation ? (
               <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
-                <span className="truncate">
+                <MapPin className="h-4 w-4 text-blue-300" />
+                <span className="truncate text-white">
                   {selectedLocation.name}
                   {selectedLocation.country && `, ${selectedLocation.country}`}
                 </span>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4" />
-                <span>Search location...</span>
+                <Search className="h-4 w-4 text-blue-300" />
+                <span className="text-blue-200/70">Search location...</span>
               </div>
             )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-blue-300" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0 md:w-[300px]">
-          <Command>
+        <PopoverContent className="w-full p-0 md:w-[300px] bg-slate-900/95 backdrop-blur-xl border-white/20 shadow-2xl">
+          <Command className="bg-slate-900/95">
             <CommandInput
               placeholder="Search for a city..."
               value={searchTerm}
               onValueChange={setSearchTerm}
+              className="text-white placeholder:text-blue-200/70 border-white/20 bg-slate-800/50"
             />
             <CommandList>
               {isSearching && (
                 <div className="flex items-center justify-center py-6">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-300" />
                 </div>
               )}
-              {!isSearching && (!searchResults || searchResults.length === 0) && searchTerm.length > 2 && (
-                <CommandEmpty>No locations found.</CommandEmpty>
+              {searchError && (
+                <div className="p-4 text-center">
+                  <p className="text-red-400 text-sm">Error: {searchError.message}</p>
+                </div>
+              )}
+              {!isSearching && !searchError && (!searchResults || searchResults.length === 0) && searchTerm.length > 2 && (
+                <CommandEmpty className="text-blue-200/70">No locations found.</CommandEmpty>
               )}
               {searchResults && searchResults.length > 0 && (
                 <CommandGroup>
@@ -99,27 +108,28 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
                       key={`${location.lat}-${location.lon}`}
                       value={`${location.name}, ${location.country}`}
                       onSelect={() => handleLocationSelect(location)}
+                      className="text-white hover:bg-slate-700/50 focus:bg-slate-700/50 bg-slate-800/30 border-b border-slate-700/30"
                     >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedLocation?.lat === location.lat && selectedLocation?.lon === location.lon
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <div className="font-medium">{location.name}</div>
-                          {location.state && (
-                            <div className="text-sm text-muted-foreground">
-                              {location.state}, {location.country}
-                            </div>
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4 text-blue-300",
+                            selectedLocation?.lat === location.lat && selectedLocation?.lon === location.lon
+                              ? "opacity-100"
+                              : "opacity-0"
                           )}
-                          {!location.state && (
-                            <div className="text-sm text-muted-foreground">{location.country}</div>
-                          )}
+                        />
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-4 w-4 text-blue-300" />
+                          <div>
+                            <div className="font-medium text-white">{location.name}</div>
+                            {location.state && (
+                              <div className="text-sm text-blue-200/70">
+                                {location.state}, {location.country}
+                              </div>
+                            )}
+                            {!location.state && (
+                              <div className="text-sm text-blue-200/70">{location.country}</div>
+                            )}
                         </div>
                       </div>
                     </CommandItem>
@@ -135,14 +145,14 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
         variant="outline"
         onClick={handleGetCurrentLocation}
         disabled={currentLocationMutation.isPending}
-        className="flex-1 md:flex-none"
+        className="flex-1 md:flex-none bg-white/5 backdrop-blur-xl border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all duration-300"
       >
         {currentLocationMutation.isPending ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin text-blue-300" />
         ) : (
-          <MapPin className="h-4 w-4" />
+          <MapPin className="h-4 w-4 text-blue-300" />
         )}
-        <span className="ml-2 md:hidden">Current</span>
+        <span className="ml-2 md:hidden text-white">Current</span>
       </Button>
     </div>
   );

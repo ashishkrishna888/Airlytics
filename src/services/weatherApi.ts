@@ -98,28 +98,45 @@ const transformToAQIData = (
 export const weatherApi = {
   // Get current weather data
   async getCurrentWeather(lat: number, lon: number): Promise<WeatherData> {
-    const response = await fetch(
-      `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Weather API error: ${response.status}`);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.cod && data.cod !== 200) {
+        throw new Error(`Weather API error: ${data.message || 'Unknown error'}`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Weather API error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 
   // Get air pollution data
   async getAirPollution(lat: number, lon: number): Promise<AirPollutionData> {
-    const response = await fetch(
-      `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Air pollution API error: ${response.status}`);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Air pollution API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Air pollution API error:', error);
+      throw error;
     }
-    
-    return response.json();
   },
 
   // Get combined AQI data (weather + air pollution)
@@ -137,25 +154,30 @@ export const weatherApi = {
     }
   },
 
-  // Search for locations by name
+  // Search for locations by name using Geocoding API
   async searchLocation(query: string): Promise<LocationData[]> {
-    const response = await fetch(
-      `${BASE_URL}/find?q=${encodeURIComponent(query)}&appid=${API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Location search API error: ${response.status}`);
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=10&appid=${API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Location search API error: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      return data.map((item: any) => ({
+        name: item.name,
+        lat: item.lat,
+        lon: item.lon,
+        country: item.country,
+        state: item.state
+      }));
+    } catch (error) {
+      console.error('Location search error:', error);
+      throw error;
     }
-    
-    const data = await response.json();
-    
-    return data.list?.map((item: any) => ({
-      name: item.name,
-      lat: item.coord.lat,
-      lon: item.coord.lon,
-      country: item.sys.country,
-      state: item.state
-    })) || [];
   },
 
   // Get location by coordinates (reverse geocoding)
